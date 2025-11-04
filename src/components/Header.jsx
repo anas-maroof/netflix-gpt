@@ -1,43 +1,73 @@
-import React from "react";
-import { signOut } from "firebase/auth";
+import React, { useEffect } from "react";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { addUser, removeUser } from "../utils/userSlice";
 
 const Header = () => {
   const navigate = useNavigate();
-  const user = useSelector((store)=>store.user);
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const user = useSelector((store) => store.user); // can be null at start!
+
+  // 🔹 Watch for login/logout
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email, displayName } = user;
+        dispatch(addUser({ uid, email, displayName }));
+        navigate("/browse");
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+      }
+    });
+    return () => unsubscribe(); // cleanup listener
+  }, []);
+
+  // 🔹 Handle sign out
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
-        navigate("/");
+        dispatch(removeUser());
       })
-      .catch((error) => {
-        navigate("/error");
-      });
+      .catch(() => navigate("/error"));
   };
+
+  // 🔹 Decide whether to show Sign In or Sign Out
   const buttonLabel = location.pathname === "/browse" ? "Sign Out" : null;
+
   return (
-    <div className="absolute w-screen px-8 py-2 bg-linear-to-b from-black z-10 flex justify-between">
+    <div className="absolute w-screen px-8 py-2 bg-linear-to-b from-black z-10 flex justify-between items-center">
       <img
-        className="w-50"
+        className="w-40"
         src="https://help.nflxext.com/helpcenter/OneTrust/oneTrust_production_2025-08-26/consent/87b6a5c0-0104-4e96-a291-092c11350111/0198e689-25fa-7d64-bb49-0f7e75f898d2/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
         alt="logo"
       />
-      { buttonLabel && <div className="flex p-2">
-        <h1 className="my-2 px-2 font-bold text-white text-lg">Hello {user.displayName}</h1>
-        <img
-          className="w-12 h-12"
-          src="data:image/webp;base64,UklGRogFAABXRUJQVlA4IHwFAABwKwCdASr5AA4BPp1OpE0lpCOiIzE4OLATiWVu4XEr57/K6lp5T8qvZoqD9V/EH45cekhbry5Vfg36gPz5/u/cA/Sz9Ves35hf5Z/jf2j96j8QPal9QD/Ef6TrQ/Q58uX2Xv24/a72gP//rL3lXsprxd8Had3gIk7IR/M2AQz3yHvh/3ADWPxGjjFzVp4gO+bxAd83iA75vEB3zeIDvm8QHfN4gO+bxAd83emAzm29BGjiqwGbb3ODDndsALzKjr6KV89GLmgzCoJNYLIxPAeSwV4aaXGO4RG+IO3eaOKhXbfd1bADz/5oTRh18yQRo4xhW4HoRo4xc1aeIDvm8QHa5vDjFmD60KvzyRzGbdMQYN5SPq0Yran7e18BbrFfgB5umn6aPVvfcBC0QU9Z0BIxdjk6qHHWMn2v2y8sknVQS/9EydqHFp+I0pHun9niA75vEB3zeIDvm8QHfN4gO+bxAd82wAD+/Lff3d6Fhf3/7mS+wD/YBmnhHgAAAJddZb6M7CbvpFNo4IMam5EH/AQtPAQWX2B2j1BxE0N8vMWkC2TaJ/JCjd7wEK/mP9L0UAF+wnI+JHA5zedc6f02lFQ2z1mfSZs0fer463A1SwDkFdH8qsdAeWeTBM03iUesMcvmTEnY83huhN8kisW+Ppm0utZe6ZaFbAKChO+KANdT0U13zvYyNJCXcuxEFgIqqm5pHsf/DB/osx1sB/rSnDWUjE7DmV1R9B0mPJRj4CSKnPOeM+66XZCAhFlzn5cjaz3zo1/Xel4YC50MmTAezoCuwe/Zb7jroH6zLtkd/lNRDH20dHLN83SneQ7Xl8Uz+VlRE96hkHWNhz6/4NEI/cVxKrrQzXG481ygBqf2RAcR15Mvfb6iD4+aLdduxespy4VyzYK4AkzxZPgSsaWyj5OZdPssvbgCUL+lyxzfrG9tj3U8ezqipKQIeasysi/fFXVk8DTYwPX02Bcgxqad2iiimu0mwSjWrC+9K+lW07+EymrDZ8KFWmjT+nZMZib8cj5LnymzbJ4VqaJzAiRtQY4PDc9gHRyqXjbUUJlEvoTbHnzPZcMTlSCyO8trYRpI5qYfM6QC4cM8Yn9dg7S2BPqFCqWa/heaOCoChN7AACmEe0uMgfCuHkeSUySfxlr6L64AcCZX5KQEjla5voBZvuyUB74OX0BnGDeg4Vme5wZXQwl4E0bM75GXxushBuHiOtka3/BDV9nFR8aKiaxi80xg7kccxfgmI1mgMqV3yRKsYir0rODnWj6QqH+WJEd50vnjZGUaqtsHZ0HdCTYJjR/6lGGnUBxJM7yprE3JvOUIrS2H44onaQAxeWzR1hq4OxBjvm8dy9q7M10/ydOMtWY3UxmuQ/dBeL0fu5bzf9bn6/WN5/DZQGyrhzM53k5vnSxESBEtrwV3BBPZ4lXj8lpcd4yXOfSrPUvCFecB82XL03u9GJYAcWy8Ti8QHm6xLqf/A8j7M1jj8ZH0iogMiXzllEK+GDrtpJcfWYaJataYhm4cPrMXWQ2VLUx6h+W31cLww/Tvrwca7ts4B1LABE4OBSsr2vvfBEhk3SQbjc1JeQfPEthrW1k/2QDN0pDiODuvN3NcKiCC0lIz5trbi+FP+YybDfpHEluDVPwFE+qYw4NPyCNDuXFr/kss4NiClrL+9iGhW0bvOD74z0kaD7MCK5s2GAKMlge7bRQvsmxNPNStLBibIP1FNJbzSGFqb/w+0AnnWC3eyTGkZczaomVGGe6zlJZOxfWlO27pHTxLpAvs/y88vuNUDmI2oOXIUAK4ll7CUwu8SCqLshbQekOLxw+CC7BEB7RzvBbe7mtLm0sNIHKjsnA+xi+3Lh2k6XBkChwF9HgQAAAAAAA="
-          alt="user-logo"
-        />
-        <button
-          onClick={handleSignOut}
-          className="font-bold w-22 h-12 text-white p-2 mx-2 cursor-pointer bg-red-600/80 rounded-md hover:bg-red-700 transition"
+
+      <div className="flex items-center gap-3">
+        {user && (
+          <>
+            <h1 className="my-2 px-2 font-bold text-white text-lg">
+              Hello {user.displayName || "User"}
+            </h1>
+            <img
+              className="w-12 h-12 rounded"
+              src="data:image/webp;base64,UklGRogFAABXRUJQVlA4IHwFAABwKwCdASr5AA4BPp1OpE0lpCOiIzE4OLATiWVu4XEr57/K6lp5T8qvZoqD9V/EH45cekhbry5Vfg36gPz5/u/cA/Sz9Ves35hf5Z/jf2j96j8QPal9QD/Ef6TrQ/Q58uX2Xv24/a72gP//rL3lXsprxd8Had3gIk7IR/M2AQz3yHvh/3ADWPxGjjFzVp4gO+bxAd83iA75vEB3zeIDvm8QHfN4gO+bxAd83emAzm29BGjiqwGbb3ODDndsALzKjr6KV89GLmgzCoJNYLIxPAeSwV4aaXGO4RG+IO3eaOKhXbfd1bADz/5oTRh18yQRo4xhW4HoRo4xc1aeIDvm8QHa5vDjFmD60KvzyRzGbdMQYN5SPq0Yran7e18BbrFfgB5umn6aPVvfcBC0QU9Z0BIxdjk6qHHWMn2v2y8sknVQS/9EydqHFp+I0pHun9niA75vEB3zeIDvm8QHfN4gO+bxAd82wAD+/Lff3d6Fhf3/7mS+wD/YBmnhHgAAAJddZb6M7CbvpFNo4IMam5EH/AQtPAQWX2B2j1BxE0N8vMWkC2TaJ/JCjd7wEK/mP9L0UAF+wnI+JHA5zedc6f02lFQ2z1mfSZs0fer463A1SwDkFdH8qsdAeWeTBM03iUesMcvmTEnY83huhN8kisW+Ppm0utZe6ZaFbAKChO+KANdT0U13zvYyNJCXcuxEFgIqqm5pHsf/DB/osx1sB/rSnDWUjE7DmV1R9B0mPJRj4CSKnPOeM+66XZCAhFlzn5cjaz3zo1/Xel4YC50MmTAezoCuwe/Zb7jroH6zLtkd/lNRDH20dHLN83SneQ7Xl8Uz+VlRE96hkHWNhz6/4NEI/cVxKrrQzXG481ygBqf2RAcR15Mvfb6iD4+aLdduxespy4VyzYK4AkzxZPgSsaWyj5OZdPssvbgCUL+lyxzfrG9tj3U8ezqipKQIeasysi/fFXVk8DTYwPX02Bcgxqad2iiimu0mwSjWrC+9K+lW07+EymrDZ8KFWmjT+nZMZib8cj5LnymzbJ4VqaJzAiRtQY4PDc9gHRyqXjbUUJlEvoTbHnzPZcMTlSCyO8trYRpI5qYfM6QC4cM8Yn9dg7S2BPqFCqWa/heaOCoChN7AACmEe0uMgfCuHkeSUySfxlr6L64AcCZX5KQEjla5voBZvuyUB74OX0BnGDeg4Vme5wZXQwl4E0bM75GXxushBuHiOtka3/BDV9nFR8aKiaxi80xg7kccxfgmI1mgMqV3yRKsYir0rODnWj6QqH+WJEd50vnjZGUaqtsHZ0HdCTYJjR/6lGGnUBxJM7yprE3JvOUIrS2H44onaQAxeWzR1hq4OxBjvm8dy9q7M10/ydOMtWY3UxmuQ/dBeL0fu5bzf9bn6/WN5/DZQGyrhzM53k5vnSxESBEtrwV3BBPZ4lXj8lpcd4yXOfSrPUvCFecB82XL03u9GJYAcWy8Ti8QHm6xLqf/A8j7M1jj8ZH0iogMiXzllEK+GDrtpJcfWYaJataYhm4cPrMXWQ2VLUx6h+W31cLww/Tvrwca7ts4B1LABE4OBSsr2vvfBEhk3SQbjc1JeQfPEthrW1k/2QDN0pDiODuvN3NcKiCC0lIz5trbi+FP+YybDfpHEluDVPwFE+qYw4NPyCNDuXFr/kss4NiClrL+9iGhW0bvOD74z0kaD7MCK5s2GAKMlge7bRQvsmxNPNStLBibIP1FNJbzSGFqb/w+0AnnWC3eyTGkZczaomVGGe6zlJZOxfWlO27pHTxLpAvs/y88vuNUDmI2oOXIUAK4ll7CUwu8SCqLshbQekOLxw+CC7BEB7RzvBbe7mtLm0sNIHKjsnA+xi+3Lh2k6XBkChwF9HgQAAAAAAA="
+              alt="user-logo"
+            />
+          </>
+        )}
+        {buttonLabel && <button
+          onClick={
+            buttonLabel === "Sign Out" ? handleSignOut : () => navigate("/")
+          }
+          className="font-bold text-white p-2 mx-2 cursor-pointer bg-red-600/80 rounded-md hover:bg-red-700 transition"
         >
           {buttonLabel}
-        </button>
-      </div> }
+        </button>}
+      </div>
     </div>
   );
 };
