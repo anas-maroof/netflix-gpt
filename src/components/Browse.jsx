@@ -7,6 +7,8 @@ import usePopularMovies from "../hooks/usePopularMovies";
 import useTopRatedMovies from "../hooks/useTopRatedMovies";
 import useUpcomingMovies from "../hooks/useUpcomingMovies";
 import useSeries from "../hooks/useSeries";
+import useSeriesAir from "../hooks/useSeriesAir";
+import useSeriesRated from "../hooks/useSeriesRated";
 
 const Browse = () => {
   useNowPlayingMovies();
@@ -14,6 +16,8 @@ const Browse = () => {
   useTopRatedMovies();
   useUpcomingMovies();
   useSeries();
+  useSeriesAir();
+  useSeriesRated();
 
   return (
     <div>
