@@ -57,7 +57,7 @@ const Header = () => {
       : null;
 
   return (
-    <div className="absolute w-screen px-8 py-2 bg-gradient-to-b from-black z-10 flex justify-between items-center">
+    <div className="absolute w-screen px-8 py-2 bg-linear-to-b from-black z-10 flex justify-between items-center">
       <img className="w-40" src={NET_LOGO} alt="logo" />
 
       <div className="flex items-center gap-3">
