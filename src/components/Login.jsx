@@ -9,6 +9,7 @@ import {
 import { auth } from "../utils/firebase";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
+import { BG_URL } from "../utils/constant";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
@@ -40,7 +41,9 @@ const Login = () => {
             .then(() => {
               // Profile updated!
               const { uid, email, displayName } = auth.currentUser;
-              dispatch(addUser({ uid: uid, email: email, displayName: displayName }));
+              dispatch(
+                addUser({ uid: uid, email: email, displayName: displayName })
+              );
             })
             .catch((error) => {
               // An error occurred
@@ -80,7 +83,7 @@ const Login = () => {
       <div className="absolute h-screen w-screen overflow-hidden">
         <img
           className="h-full w-full object-cover"
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/9c363af5-4750-4f14-87d1-8125f5276db0/web/IN-en-20251027-TRIFECTA-perspective_b68b1528-3a10-4997-9f99-48ccbdb86626_large.jpg"
+          src={BG_URL}
           alt="Background"
         />
       </div>
