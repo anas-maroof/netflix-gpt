@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
 import { NET_LOGO, USER_LOGO } from "../utils/constant";
+import { toggleGptSearchView } from "../utils/gptSlice";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -36,6 +37,10 @@ const Header = () => {
       .catch(() => navigate("/error"));
   };
 
+  const handleGptSearchClick = () => {
+    dispatch(toggleGptSearchView());
+  };
+
   // 🔹 Decide whether to show Sign In or Sign Out
   const buttonLabel = location.pathname === "/browse" ? "Sign Out" : null;
 
@@ -49,10 +54,17 @@ const Header = () => {
             <h1 className="my-2 px-2 font-bold text-white text-lg">
               Hello {user.displayName || "User"}
             </h1>
+            <button
+              className="font-bold text-white p-2 mx-2 cursor-pointer bg-black rounded-md hover:bg-red-700 transition"
+              onClick={handleGptSearchClick}
+            >
+              GPT Search
+            </button>
             <img
               className="w-12 h-12 rounded"
               src={USER_LOGO}
               alt="user-logo"
+              title={`Hello ${user.displayName}`}
             />
           </>
         )}
@@ -61,7 +73,7 @@ const Header = () => {
             onClick={
               buttonLabel === "Sign Out" ? handleSignOut : () => navigate("/")
             }
-            className="font-bold text-white p-2 mx-2 cursor-pointer bg-red-600/80 rounded-md hover:bg-red-700 transition"
+            className="font-bold text-white p-2 mx-2 cursor-pointer bg-black rounded-md hover:bg-red-700 transition"
           >
             {buttonLabel}
           </button>
