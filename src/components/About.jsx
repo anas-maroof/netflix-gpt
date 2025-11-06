@@ -11,7 +11,7 @@ const About = () => {
       <Header />
 
       {/* Main Content Section with BG and Overlay */}
-      <div className="relative flex-grow flex items-center justify-center py-20 px-5">
+      <div className="relative grow flex items-center justify-center py-20 px-5">
         {/* Background Image */}
         <img
           className="absolute inset-0 w-full h-full object-cover"
@@ -20,7 +20,7 @@ const About = () => {
         />
 
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-transparent"></div>
 
         {/* Foreground Content */}
         <div className="relative z-10">
