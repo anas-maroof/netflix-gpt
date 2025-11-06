@@ -1,19 +1,18 @@
 import React, { useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
-import { NET_LOGO, USER_LOGO } from "../utils/constant";
+import { NET_LOGO, USER_LOGO, SUPPORTED_LANGUAGES } from "../utils/constant";
 import { toggleGptSearchView } from "../utils/gptSlice";
-import { SUPPORTED_LANGUAGES } from "../utils/constant";
 import { changeLanguage } from "../utils/configSlice.js";
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const user = useSelector((store) => store.user); // can be null at start!
+  const user = useSelector((store) => store.user);
   const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
 
   // 🔹 Watch for login/logout
@@ -22,21 +21,21 @@ const Header = () => {
       if (user) {
         const { uid, email, displayName } = user;
         dispatch(addUser({ uid, email, displayName }));
-        navigate("/browse");
+        if (location.pathname === "/" || location.pathname === "/login") {
+          navigate("/browse");
+        }
       } else {
         dispatch(removeUser());
         navigate("/");
       }
     });
-    return () => unsubscribe(); // cleanup listener
+    return () => unsubscribe();
   }, []);
 
   // 🔹 Handle sign out
   const handleSignOut = () => {
     signOut(auth)
-      .then(() => {
-        dispatch(removeUser());
-      })
+      .then(() => dispatch(removeUser()))
       .catch(() => navigate("/error"));
   };
 
@@ -48,14 +47,21 @@ const Header = () => {
     dispatch(changeLanguage(e.target.value));
   };
 
-  // 🔹 Decide whether to show Sign In or Sign Out
-  const buttonLabel = location.pathname === "/browse" ? "Sign Out" : null;
+  // 🔹 About/Home toggle
+  const isAboutPage = location.pathname === "/about";
+
+  // 🔹 Sign Out button visibility
+  const buttonLabel =
+    location.pathname === "/browse" || location.pathname === "/about"
+      ? "Sign Out"
+      : null;
 
   return (
-    <div className="absolute w-screen px-8 py-2 bg-linear-to-b from-black z-10 flex justify-between items-center">
+    <div className="absolute w-screen px-8 py-2 bg-gradient-to-b from-black z-10 flex justify-between items-center">
       <img className="w-40" src={NET_LOGO} alt="logo" />
 
       <div className="flex items-center gap-3">
+        {/* 🔹 Language selector */}
         {user && showGptSearch && (
           <select
             className="bg-black/70 text-white font-semibold px-4 py-2 rounded-md border border-gray-600 
@@ -74,28 +80,39 @@ const Header = () => {
             ))}
           </select>
         )}
+
+        {/* 🔹 User Info & Buttons */}
         {user && (
           <>
             <h1 className="my-2 px-2 font-bold text-white text-lg">
               Hello {user.displayName || "User"}
             </h1>
+
             <button
               className="font-bold text-white p-2 mx-2 cursor-pointer bg-black rounded-md hover:bg-red-700 transition"
               onClick={handleGptSearchClick}
             >
               {showGptSearch ? "Home" : "GPT Search"}
             </button>
+
             <img
               className="w-12 h-12 rounded"
               src={USER_LOGO}
               alt="user-logo"
               title={`Hello ${user.displayName}`}
             />
-            <button className="font-bold text-white p-2 mx-2 cursor-pointer bg-black rounded-md hover:bg-red-700 transition">
-              About
+
+            {/* 🔹 About / Home button */}
+            <button
+              className="font-bold text-white p-2 mx-2 cursor-pointer bg-black rounded-md hover:bg-red-700 transition"
+              onClick={() => navigate(isAboutPage ? "/browse" : "/about")}
+            >
+              {isAboutPage ? "Home" : "About"}
             </button>
           </>
         )}
+
+        {/* 🔹 Sign Out button */}
         {buttonLabel && (
           <button
             onClick={
