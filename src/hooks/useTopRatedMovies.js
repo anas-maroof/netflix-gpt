@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 const useTopRatedMovies = () => {
   const dispatch = useDispatch();
-  const topRated = useSelector(store=>store.movies?.nowTopRatedMovies)
+  const nowTopRatedMovies = useSelector(store=>store.movies?.nowTopRatedMovies)
 
   const getTopRatedMovies = async () => {
     const data = await fetch(
@@ -16,7 +16,7 @@ const useTopRatedMovies = () => {
     dispatch(addTopRatedMovies(json.results));
   };
   useEffect(() => {
-    topRated && getTopRatedMovies();
+    !nowTopRatedMovies && getTopRatedMovies();
   }, []);
 };
 

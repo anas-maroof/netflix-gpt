@@ -16,7 +16,7 @@ const useUpcomingMovies = () => {
     dispatch(addUpcomingMovies(json.results));
   };
   useEffect(() => {
-    upcoming && getUpcomingMovies();
+    !upcoming && getUpcomingMovies();
   }, []);
 };
 

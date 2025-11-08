@@ -15,7 +15,7 @@ const useSeriesRated = () => {
     dispatch(addSeriesRated(json.results));
   };
   useEffect(() => {
-    seriesRated &&getSeriesRated();
+    !seriesRated &&getSeriesRated();
   }, []);
 };
 

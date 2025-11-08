@@ -15,7 +15,7 @@ const useSeriesAir = () => {
     dispatch(addSeriesAir(json.results));
   };
   useEffect(() => {
-    seriesAir && getSeriesAir();
+    !seriesAir && getSeriesAir();
   }, []);
 };
 
