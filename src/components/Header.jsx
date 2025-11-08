@@ -58,7 +58,13 @@ const Header = () => {
 
   return (
     <div className="absolute w-screen px-8 py-2 bg-linear-to-b from-black z-10 flex justify-between items-center">
-      <img className="w-40" src={NET_LOGO} alt="logo" />
+      <img
+        className="w-40 cursor-pointer"
+        src={NET_LOGO}
+        alt="logo"
+        onClick={() => navigate("/browse")}
+        title="Go to Home"
+      />
 
       <div className="flex items-center gap-3">
         {/* 🔹 Language selector */}

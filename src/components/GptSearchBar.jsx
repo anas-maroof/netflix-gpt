@@ -44,7 +44,6 @@ const GptSearchBar = () => {
       const result = await model.generateContent(query);
 
       const gptMovies = result.response.text().split(",");
-      console.log("AI Response:", gptMovies);
 
       const promiseArray = gptMovies.map((movie) => searchMovieTMDB(movie));
       const tmdbResults = await Promise.all(promiseArray);
@@ -61,7 +60,6 @@ const GptSearchBar = () => {
         })
       );
     } catch (err) {
-      console.error(err);
       clearTimeout(shimmerTimeout);
       setLoading(false);
     }

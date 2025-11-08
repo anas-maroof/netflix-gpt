@@ -1,10 +1,11 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { API_OPTIONS } from "../utils/constant";
 import { addSeries } from "../utils/moviesSlice";
 import { useEffect } from "react";
 
 const useSeries = () => {
   const dispatch = useDispatch();
+  const series = useSelector(store =>store.movies?.nowSeries)
 
   const getSeries = async () => {
     const data = await fetch(
@@ -15,7 +16,7 @@ const useSeries = () => {
     dispatch(addSeries(json.results));
   };
   useEffect(() => {
-    getSeries();
+    !series && getSeries();
   }, []);
 };
 
