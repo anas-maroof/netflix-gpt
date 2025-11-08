@@ -31,7 +31,7 @@ const GptSearchBar = () => {
     setLoading(true);
 
     // 🕒 Force shimmer to stay visible at least 10 seconds
-    const shimmerTimeout = setTimeout(() => setLoading(false), 10000);
+    const shimmerTimeout = setTimeout(() => setLoading(false), 20000);
 
     try {
       const query =

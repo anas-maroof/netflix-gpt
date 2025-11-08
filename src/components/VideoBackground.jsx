@@ -28,7 +28,7 @@ const VideoBackground = ({ movieId }) => {
   // Error or no trailer
   if (error || !trailerVideo) {
     return (
-      <div className="flex flex-col justify-center items-center h-[80vh] bg-gradient-to-b from-gray-900 to-black text-white text-center px-6">
+      <div className="flex flex-col justify-center items-center h-[80vh] bg-linear-to-b from-gray-900 to-black text-white text-center px-6">
         <h1 className="text-4xl font-bold mb-3 text-red-500 animate-pulse">
           😔 No Trailer Found
         </h1>
